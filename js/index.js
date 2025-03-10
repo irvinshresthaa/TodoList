@@ -34,6 +34,14 @@ document.addEventListener("DOMContentLoaded", function () {
     checkedTodoLength > 0 && completedTodoList(checkedTodoLength);
   }
 
+  function completedCount() {
+    const checkedTodoLength = todos.filter(
+      (todoItem) => todoItem.completed
+    ).length;
+
+    completedTodoList(checkedTodoLength || 0);
+  }
+
   function createTodoElements(todo, index) {
     const listItem = document.createElement("div");
     listItem.className = "todo-item";
@@ -45,11 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
     checkBox.addEventListener("change", function () {
       todos[index].completed = checkBox.checked;
       saveTodos();
-      const checkedTodoLength = todos.filter(
-        (todoItem) => todoItem.completed
-      ).length;
-
-      completedTodoList(checkedTodoLength || 0);
+      completedCount();
     });
 
     const spanText = document.createElement("span");
@@ -62,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
       todos.splice(index, 1);
       renderTodos();
       saveTodos();
+      completedCount();
     });
 
     listItem.appendChild(checkBox);
