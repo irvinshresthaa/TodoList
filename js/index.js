@@ -1,18 +1,15 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const input = document.querySelector(".add-todo input");
   const addButton = document.querySelector(".add-todo button");
   const todoListContainer = document.querySelector(".todo-list");
   const completedList = document.querySelector(".completed-list");
 
   let todos = JSON.parse(localStorage.getItem("todoList")) || [];
-  //on button click
-  addButton.addEventListener("click", addTodo);
 
-  //on "enter" key press
-  input.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-      addTodo();
-    }
+  // Event listeners
+  addButton.addEventListener("click", addTodo);
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") addTodo();
   });
 
   function saveTodos() {
@@ -21,59 +18,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function renderTodos() {
     todoListContainer.innerHTML = "";
-
     todos.forEach((todo, index) => {
       const listItem = createTodoElements(todo, index);
       todoListContainer.appendChild(listItem);
     });
 
-    const checkedTodoLength = todos.filter(
-      (todoItem) => todoItem.completed
-    ).length;
-
-    checkedTodoLength > 0 && completedTodoList(checkedTodoLength);
+    updateCompletedCount();
   }
 
-  function completedCount() {
-    const checkedTodoLength = todos.filter(
-      (todoItem) => todoItem.completed
-    ).length;
-
-    completedTodoList(checkedTodoLength || 0);
-  }
-
-  function createTodoElements(todo, index) {
-    const listItem = document.createElement("div");
-    listItem.className = "todo-item";
-
-    const checkBox = document.createElement("input");
-    checkBox.type = "checkBox";
-    checkBox.style.cursor = "pointer";
-    checkBox.checked = todo.completed;
-    checkBox.addEventListener("change", function () {
-      todos[index].completed = checkBox.checked;
-      saveTodos();
-      completedCount();
-    });
-
-    const spanText = document.createElement("span");
-    spanText.textContent = todo.text;
-
-    const deleteBtn = document.createElement("span");
-    deleteBtn.textContent = "x";
-    deleteBtn.style.cursor = "pointer";
-    deleteBtn.addEventListener("click", function () {
-      todos.splice(index, 1);
-      renderTodos();
-      saveTodos();
-      completedCount();
-    });
-
-    listItem.appendChild(checkBox);
-    listItem.appendChild(spanText);
-    listItem.appendChild(deleteBtn);
-
-    return listItem;
+  function updateCompletedCount() {
+    const checkedTodoLength = todos.filter(todoItem => todoItem.completed).length;
+    completedTodoList(checkedTodoLength);
   }
 
   function completedTodoList(checkedTodoLength) {
@@ -85,9 +40,64 @@ document.addEventListener("DOMContentLoaded", function () {
     completedList.appendChild(listItem);
   }
 
+  function createTodoElements(todo, index) {
+    const listItem = document.createElement("div");
+    listItem.className = "todo-item";
+
+    const checkBox = createCheckBox(todo, index);
+    const spanText = createEditableText(todo, index);
+    const deleteBtn = createDeleteButton(index);
+
+    listItem.appendChild(checkBox);
+    listItem.appendChild(spanText);
+    listItem.appendChild(deleteBtn);
+
+    return listItem;
+  }
+
+  function createCheckBox(todo, index) {
+    const checkBox = document.createElement("input");
+    checkBox.type = "checkbox";
+    checkBox.style.cursor = "pointer";
+    checkBox.checked = todo.completed;
+    checkBox.addEventListener("change", () => {
+      todos[index].completed = checkBox.checked;
+      saveTodos();
+      updateCompletedCount();
+    });
+    return checkBox;
+  }
+
+  function createEditableText(todo, index) {
+    const spanText = document.createElement("span");
+    spanText.textContent = todo.text;
+    spanText.setAttribute("contenteditable", true);
+    spanText.className = "todo-text";
+    spanText.addEventListener("blur", () => {
+      todos[index].text = spanText.textContent.trim();
+      saveTodos();
+    });
+    return spanText;
+  }
+
+  function createDeleteButton(index) {
+    const deleteBtn = document.createElement("span");
+    deleteBtn.textContent = "x";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.className = "delete-btn";
+    deleteBtn.addEventListener("click", () => {
+      todos.splice(index, 1);
+      renderTodos();
+      saveTodos();
+      updateCompletedCount();
+    });
+    return deleteBtn;
+  }
+
   function addTodo() {
-    if (input.value.trim() !== "") {
-      const newTodo = { text: input.value, completed: false };
+    const todoText = input.value.trim();
+    if (todoText !== "") {
+      const newTodo = { text: todoText, completed: false };
       todos.push(newTodo);
       renderTodos();
       saveTodos();

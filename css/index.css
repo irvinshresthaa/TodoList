@@ -73,3 +73,18 @@
     background: #FFDDAE;
     border: none;
 }
+
+.todo-text {
+    padding: 10px;
+}
+
+.todo-text {
+    outline: none;
+    max-width: 452px;
+    overflow: auto;
+}
+
+.delete-btn {
+    margin-top: auto;
+    margin-bottom: auto;
+}
